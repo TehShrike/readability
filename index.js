@@ -1,16 +1,16 @@
-var path = require("path");
-var fs = require("fs");
-var url = require("url");
+const path = require("path");
+const fs = require("fs");
+const url = require("url");
 
 // We want to load Readability and JSDOMParser, which aren't set up as commonjs libraries,
 // and so we need to do some hocus-pocus with 'vm' to import them on a separate scope
 // (identical) scope context.
-var vm = require("vm");
-var readabilityPath = path.join(__dirname, "Readability.js");
-var jsdomPath = path.join(__dirname, "JSDOMParser.js");
+const vm = require("vm");
+const readabilityPath = path.join(__dirname, "Readability.js");
+const jsdomPath = path.join(__dirname, "JSDOMParser.js");
 
 
-var scopeContext = {};
+const scopeContext = {};
 // We generally expect dump() and console.{whatever} to work, so make these available
 // in the scope we're using:
 scopeContext.dump = console.log;
@@ -25,5 +25,5 @@ vm.runInNewContext(fs.readFileSync(readabilityPath), scopeContext, readabilityPa
 
 module.exports = {
   Readability: scopeContext.Readability,
-  JSDOMParser: scopeContext.JSDOMParser
+  JSDOMParser: scopeContext.JSDOMParser,
 };

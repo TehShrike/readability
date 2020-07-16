@@ -1,17 +1,17 @@
-var JSDOM = require("jsdom").JSDOM;
-var chai = require("chai");
-var sinon = require("sinon");
+const JSDOM = require("jsdom").JSDOM;
+const chai = require("chai");
+const sinon = require("sinon");
 chai.config.includeStack = true;
-var expect = chai.expect;
+const expect = chai.expect;
 
-var readability = require("../index");
-var Readability = readability.Readability;
-var JSDOMParser = readability.JSDOMParser;
+const readability = require("../index");
+const Readability = readability.Readability;
+const JSDOMParser = readability.JSDOMParser;
 
-var testPages = require("./utils").getTestPages();
+const testPages = require("./utils").getTestPages();
 
 function reformatError(err) {
-  var formattedError = new Error(err.message);
+  const formattedError = new Error(err.message);
   formattedError.stack = err.stack;
   return formattedError;
 }
@@ -34,8 +34,8 @@ function inOrderIgnoreEmptyTextNodes(fromNode) {
 }
 
 function traverseDOM(callback, expectedDOM, actualDOM) {
-  var actualNode = actualDOM.documentElement || actualDOM.childNodes[0];
-  var expectedNode = expectedDOM.documentElement || expectedDOM.childNodes[0];
+  let actualNode = actualDOM.documentElement || actualDOM.childNodes[0];
+  let expectedNode = expectedDOM.documentElement || expectedDOM.childNodes[0];
   while (actualNode || expectedNode) {
     // We'll stop if we don't have both actualNode and expectedNode
     if (!callback(actualNode, expectedNode)) {
@@ -55,25 +55,25 @@ function runTestsWithItems(label, domGenerationFn, source, expectedContent, expe
   describe(label, function() {
     this.timeout(10000);
 
-    var result;
+    let result;
 
-    before(function() {
+    before(() => {
       try {
-        var doc = domGenerationFn(source);
+        const doc = domGenerationFn(source);
         // Provide one class name to preserve, which we know appears in a few
         // of the test documents.
-        var myReader = new Readability(doc, { classesToPreserve: ["caption"] });
+        const myReader = new Readability(doc, { classesToPreserve: [ "caption" ] });
         result = myReader.parse();
       } catch (err) {
         throw reformatError(err);
       }
     });
 
-    it("should return a result object", function() {
+    it("should return a result object", () => {
       expect(result).to.include.keys("content", "title", "excerpt", "byline");
     });
 
-    it("should extract expected content", function() {
+    it("should extract expected content", () => {
       function nodeStr(n) {
         if (!n) {
           return "(no node)";
@@ -84,7 +84,7 @@ function runTestsWithItems(label, domGenerationFn, source, expectedContent, expe
         if (n.nodeType != 1) {
           return "some other node type: " + n.nodeType + " with data " + n.data;
         }
-        var rv = n.localName;
+        let rv = n.localName;
         if (n.id) {
           rv += "#" + n.id;
         }
@@ -101,9 +101,9 @@ function runTestsWithItems(label, domGenerationFn, source, expectedContent, expe
         if (node.tagName == "BODY") {
           return "body";
         }
-        var parent = node.parentNode;
-        var parentPath = genPath(parent);
-        var index = Array.prototype.indexOf.call(parent.childNodes, node) + 1;
+        const parent = node.parentNode;
+        const parentPath = genPath(parent);
+        const index = Array.prototype.indexOf.call(parent.childNodes, node) + 1;
         return parentPath + " > " + nodeStr(node) + ":nth-child(" + index + ")";
       }
 
@@ -112,40 +112,38 @@ function runTestsWithItems(label, domGenerationFn, source, expectedContent, expe
       }
 
       function attributesForNode(node) {
-        return Array.from(node.attributes).map(function(attr) {
-          return attr.name + "=" + attr.value;
-        }).join(",");
+        return Array.from(node.attributes).map(attr => attr.name + "=" + attr.value).join(",");
       }
 
 
-      var actualDOM = domGenerationFn(result.content);
-      var expectedDOM = domGenerationFn(expectedContent);
-      traverseDOM(function(actualNode, expectedNode) {
+      const actualDOM = domGenerationFn(result.content);
+      const expectedDOM = domGenerationFn(expectedContent);
+      traverseDOM((actualNode, expectedNode) => {
         if (actualNode && expectedNode) {
-          var actualDesc = nodeStr(actualNode);
-          var expectedDesc = nodeStr(expectedNode);
+          const actualDesc = nodeStr(actualNode);
+          const expectedDesc = nodeStr(expectedNode);
           if (actualDesc != expectedDesc) {
             expect(actualDesc, findableNodeDesc(actualNode)).eql(expectedDesc);
             return false;
           }
           // Compare text for text nodes:
           if (actualNode.nodeType == 3) {
-            var actualText = htmlTransform(actualNode.textContent);
-            var expectedText = htmlTransform(expectedNode.textContent);
+            const actualText = htmlTransform(actualNode.textContent);
+            const expectedText = htmlTransform(expectedNode.textContent);
             expect(actualText, findableNodeDesc(actualNode)).eql(expectedText);
             if (actualText != expectedText) {
               return false;
             }
           // Compare attributes for element nodes:
           } else if (actualNode.nodeType == 1) {
-            var actualNodeDesc = attributesForNode(actualNode);
-            var expectedNodeDesc = attributesForNode(expectedNode);
-            var desc = "node " + nodeStr(actualNode) + " attributes (" + actualNodeDesc + ") should match (" + expectedNodeDesc + ") ";
+            const actualNodeDesc = attributesForNode(actualNode);
+            const expectedNodeDesc = attributesForNode(expectedNode);
+            const desc = "node " + nodeStr(actualNode) + " attributes (" + actualNodeDesc + ") should match (" + expectedNodeDesc + ") ";
             expect(actualNode.attributes.length, desc).eql(expectedNode.attributes.length);
-            for (var i = 0; i < actualNode.attributes.length; i++) {
-              var attr = actualNode.attributes[i].name;
-              var actualValue = actualNode.getAttribute(attr);
-              var expectedValue = expectedNode.getAttribute(attr);
+            for (let i = 0; i < actualNode.attributes.length; i++) {
+              const attr = actualNode.attributes[i].name;
+              const actualValue = actualNode.getAttribute(attr);
+              const expectedValue = expectedNode.getAttribute(attr);
               expect(expectedValue, "node (" + findableNodeDesc(actualNode) + ") attribute " + attr + " should match").eql(actualValue);
             }
           }
@@ -157,31 +155,31 @@ function runTestsWithItems(label, domGenerationFn, source, expectedContent, expe
       }, actualDOM, expectedDOM);
     });
 
-    it("should extract expected title", function() {
+    it("should extract expected title", () => {
       expect(expectedMetadata.title).eql(result.title);
     });
 
-    it("should extract expected byline", function() {
+    it("should extract expected byline", () => {
       expect(expectedMetadata.byline).eql(result.byline);
     });
 
-    it("should extract expected excerpt", function() {
+    it("should extract expected excerpt", () => {
       expect(expectedMetadata.excerpt).eql(result.excerpt);
     });
 
-    it("should extract expected site name", function() {
+    it("should extract expected site name", () => {
       expect(expectedMetadata.siteName).eql(result.siteName);
     });
 
-    expectedMetadata.dir && it("should extract expected direction", function() {
+    expectedMetadata.dir && it("should extract expected direction", () => {
       expect(expectedMetadata.dir).eql(result.dir);
     });
   });
 }
 
 function removeCommentNodesRecursively(node) {
-  for (var i = node.childNodes.length - 1; i >= 0; i--) {
-    var child = node.childNodes[i];
+  for (let i = node.childNodes.length - 1; i >= 0; i--) {
+    const child = node.childNodes[i];
     if (child.nodeType === child.COMMENT_NODE) {
       node.removeChild(child);
     } else if (child.nodeType === child.ELEMENT_NODE) {
@@ -190,44 +188,44 @@ function removeCommentNodesRecursively(node) {
   }
 }
 
-describe("Readability API", function() {
-  describe("#constructor", function() {
-    var doc = new JSDOMParser().parse("<html><div>yo</div></html>");
-    it("should accept a debug option", function() {
+describe("Readability API", () => {
+  describe("#constructor", () => {
+    const doc = new JSDOMParser().parse("<html><div>yo</div></html>");
+    it("should accept a debug option", () => {
       expect(new Readability(doc)._debug).eql(false);
-      expect(new Readability(doc, {debug: true})._debug).eql(true);
+      expect(new Readability(doc, { debug: true })._debug).eql(true);
     });
 
-    it("should accept a nbTopCandidates option", function() {
+    it("should accept a nbTopCandidates option", () => {
       expect(new Readability(doc)._nbTopCandidates).eql(5);
-      expect(new Readability(doc, {nbTopCandidates: 42})._nbTopCandidates).eql(42);
+      expect(new Readability(doc, { nbTopCandidates: 42 })._nbTopCandidates).eql(42);
     });
 
-    it("should accept a maxElemsToParse option", function() {
+    it("should accept a maxElemsToParse option", () => {
       expect(new Readability(doc)._maxElemsToParse).eql(0);
-      expect(new Readability(doc, {maxElemsToParse: 42})._maxElemsToParse).eql(42);
+      expect(new Readability(doc, { maxElemsToParse: 42 })._maxElemsToParse).eql(42);
     });
 
-    it("should accept a keepClasses option", function() {
+    it("should accept a keepClasses option", () => {
       expect(new Readability(doc)._keepClasses).eql(false);
-      expect(new Readability(doc, {keepClasses: true})._keepClasses).eql(true);
-      expect(new Readability(doc, {keepClasses: false})._keepClasses).eql(false);
+      expect(new Readability(doc, { keepClasses: true })._keepClasses).eql(true);
+      expect(new Readability(doc, { keepClasses: false })._keepClasses).eql(false);
     });
   });
 
-  describe("#parse", function() {
-    var exampleSource = testPages[0].source;
+  describe("#parse", () => {
+    const exampleSource = testPages[0].source;
 
-    it("shouldn't parse oversized documents as per configuration", function() {
-      var doc = new JSDOMParser().parse("<html><div>yo</div></html>");
-      expect(function() {
-        new Readability(doc, {maxElemsToParse: 1}).parse();
+    it("shouldn't parse oversized documents as per configuration", () => {
+      const doc = new JSDOMParser().parse("<html><div>yo</div></html>");
+      expect(() => {
+        new Readability(doc, { maxElemsToParse: 1 }).parse();
       }).to.Throw("Aborting parsing document; 2 elements found");
     });
 
-    it("should run _cleanClasses with default configuration", function() {
-      var doc = new JSDOMParser().parse(exampleSource);
-      var parser = new Readability(doc);
+    it("should run _cleanClasses with default configuration", () => {
+      const doc = new JSDOMParser().parse(exampleSource);
+      const parser = new Readability(doc);
 
       parser._cleanClasses = sinon.fake();
 
@@ -236,9 +234,9 @@ describe("Readability API", function() {
       expect(parser._cleanClasses.called).eql(true);
     });
 
-    it("should run _cleanClasses when option keepClasses = false", function() {
-      var doc = new JSDOMParser().parse(exampleSource);
-      var parser = new Readability(doc, {keepClasses: false});
+    it("should run _cleanClasses when option keepClasses = false", () => {
+      const doc = new JSDOMParser().parse(exampleSource);
+      const parser = new Readability(doc, { keepClasses: false });
 
       parser._cleanClasses = sinon.fake();
 
@@ -247,9 +245,9 @@ describe("Readability API", function() {
       expect(parser._cleanClasses.called).eql(true);
     });
 
-    it("shouldn't run _cleanClasses when option keepClasses = true", function() {
-      var doc = new JSDOMParser().parse(exampleSource);
-      var parser = new Readability(doc, {keepClasses: true});
+    it("shouldn't run _cleanClasses when option keepClasses = true", () => {
+      const doc = new JSDOMParser().parse(exampleSource);
+      const parser = new Readability(doc, { keepClasses: true });
 
       parser._cleanClasses = sinon.fake();
 
@@ -257,26 +255,25 @@ describe("Readability API", function() {
 
       expect(parser._cleanClasses.called).eql(false);
     });
-
   });
 });
 
-describe("Test pages", function() {
-  testPages.forEach(function(testPage) {
-    describe(testPage.dir, function() {
-      var uri = "http://fakehost/test/page.html";
+describe("Test pages", () => {
+  testPages.forEach(testPage => {
+    describe(testPage.dir, () => {
+      const uri = "http://fakehost/test/page.html";
 
-      runTestsWithItems("jsdom", function(source) {
-        var doc = new JSDOM(source, {
+      runTestsWithItems("jsdom", source => {
+        const doc = new JSDOM(source, {
           url: uri,
         }).window.document;
         removeCommentNodesRecursively(doc);
         return doc;
       }, testPage.source, testPage.expectedContent, testPage.expectedMetadata);
 
-      runTestsWithItems("JSDOMParser", function(source) {
-        var parser = new JSDOMParser();
-        var doc = parser.parse(source, uri);
+      runTestsWithItems("JSDOMParser", source => {
+        const parser = new JSDOMParser();
+        const doc = parser.parse(source, uri);
         if (parser.errorState) {
           console.error("Parsing this DOM caused errors:", parser.errorState);
           return null;

@@ -1,7 +1,7 @@
 "use strict";
 
 module.exports = {
-  "rules": {
+  rules: {
     // Braces only needed for multi-line arrow function blocks
     // "arrow-body-style": [2, "as-needed"],
 
@@ -15,7 +15,7 @@ module.exports = {
     "brace-style": 2,
 
     // No space before always a space after a comma
-    "comma-spacing": [2, {"before": false, "after": true}],
+    "comma-spacing": [ 2, { before: false, after: true }],
 
     // Commas at the end of the line not the start
     // "comma-style": 2,
@@ -38,13 +38,13 @@ module.exports = {
     // "generator-star-spacing": [2, {"before": false, "after": true}],
 
     // Two space indent
-    "indent": [2, 2, { "SwitchCase": 1 }],
+    indent: [ 2, 2, { SwitchCase: 1 }],
 
     // Space after colon not before in property declarations
-    "key-spacing": [2, { "beforeColon": false, "afterColon": true, "mode": "minimum" }],
+    "key-spacing": [ 2, { beforeColon: false, afterColon: true, mode: "minimum" }],
 
     // Unix linebreaks
-    "linebreak-style": [2, "unix"],
+    "linebreak-style": [ 2, "unix" ],
 
     // Always require parenthesis for new calls
     "new-parens": 2,
@@ -101,10 +101,10 @@ module.exports = {
     "no-lonely-if": 2,
 
     // No mixing spaces and tabs in indent
-    "no-mixed-spaces-and-tabs": [2, "smart-tabs"],
+    "no-mixed-spaces-and-tabs": [ 2, "smart-tabs" ],
 
     // No unnecessary spacing
-    "no-multi-spaces": [2, { exceptions: { "AssignmentExpression": true, "VariableDeclarator": true, "ArrayExpression": true, "ObjectExpression": true } }],
+    "no-multi-spaces": [ 2, { exceptions: { AssignmentExpression: true, VariableDeclarator: true, ArrayExpression: true, ObjectExpression: true } }],
 
     // No reassigning native JS objects
     "no-native-reassign": 2,
@@ -155,7 +155,7 @@ module.exports = {
     // "no-unused-expressions": 2,
 
     // No declaring variables that are never used
-    "no-unused-vars": [2, {"vars": "all", "args": "none"}],
+    "no-unused-vars": [ 2, { vars: "all", args: "none" }],
 
     // No using variables before defined
     // "no-use-before-define": [2, "nofunc"],
@@ -164,16 +164,16 @@ module.exports = {
     "no-with": 2,
 
     // No if/while/for blocks on the same line as the if/while/for statement:
-    "nonblock-statement-body-position": [2, "below"],
+    "nonblock-statement-body-position": [ 2, "below" ],
 
     // Always require semicolon at end of statement
-    "semi": [2, "always"],
+    semi: [ 2, "always" ],
 
     // Require space after keywords
     "keyword-spacing": 2,
 
     // Always use double quotes
-    "quotes": [2, "double", {"avoidEscape": true}],
+    quotes: [ 2, "double", { avoidEscape: true }],
 
     // Require space before blocks
     "space-before-blocks": 2,
@@ -202,4 +202,4 @@ module.exports = {
     // Only check typeof against valid results
     "valid-typeof": 2,
   },
-}
+};

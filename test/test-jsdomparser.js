@@ -1,17 +1,17 @@
-var chai = require("chai");
+const chai = require("chai");
 chai.config.includeStack = true;
-var expect = chai.expect;
+const expect = chai.expect;
 
-var readability = require("../index.js");
-var JSDOMParser = readability.JSDOMParser;
+const readability = require("../index.js");
+const JSDOMParser = readability.JSDOMParser;
 
-var BASETESTCASE = '<html><body><p>Some text and <a class="someclass" href="#">a link</a></p>' +
-                   '<div id="foo">With a <script>With &lt; fancy " characters in it because' +
-                   '</script> that is fun.<span>And another node to make it harder</span></div><form><input type="text"/><input type="number"/>Here\'s a form</form></body></html>';
+const BASETESTCASE = '<html><body><p>Some text and <a class="someclass" href="#">a link</a></p>'
+                   + '<div id="foo">With a <script>With &lt; fancy " characters in it because'
+                   + '</script> that is fun.<span>And another node to make it harder</span></div><form><input type="text"/><input type="number"/>Here\'s a form</form></body></html>';
 
-var baseDoc = new JSDOMParser().parse(BASETESTCASE, "http://fakehost/");
+const baseDoc = new JSDOMParser().parse(BASETESTCASE, "http://fakehost/");
 
-describe("Test JSDOM functionality", function() {
+describe("Test JSDOM functionality", () => {
   function nodeExpect(actual, expected) {
     try {
       expect(actual).eql(expected);
@@ -19,57 +19,56 @@ describe("Test JSDOM functionality", function() {
       throw ex.message;
     }
   }
-  it("should work for basic operations using the parent child hierarchy and innerHTML", function() {
+  it("should work for basic operations using the parent child hierarchy and innerHTML", () => {
     expect(baseDoc.childNodes.length).eql(1);
     expect(baseDoc.getElementsByTagName("*").length).eql(10);
-    var foo = baseDoc.getElementById("foo");
+    const foo = baseDoc.getElementById("foo");
     expect(foo.parentNode.localName).eql("body");
     nodeExpect(baseDoc.body, foo.parentNode);
     nodeExpect(baseDoc.body.parentNode, baseDoc.documentElement);
     expect(baseDoc.body.childNodes.length).eql(3);
 
-    var generatedHTML = baseDoc.getElementsByTagName("p")[0].innerHTML;
+    let generatedHTML = baseDoc.getElementsByTagName("p")[0].innerHTML;
     expect(generatedHTML).eql('Some text and <a class="someclass" href="#">a link</a>');
-    var scriptNode = baseDoc.getElementsByTagName("script")[0];
+    const scriptNode = baseDoc.getElementsByTagName("script")[0];
     generatedHTML = scriptNode.innerHTML;
     expect(generatedHTML).eql('With &lt; fancy " characters in it because');
     expect(scriptNode.textContent).eql('With < fancy " characters in it because');
-
   });
 
-  it("should have basic URI information", function() {
+  it("should have basic URI information", () => {
     expect(baseDoc.documentURI, "http://fakehost/");
     expect(baseDoc.baseURI, "http://fakehost/");
   });
 
-  it("should deal with script tags", function() {
+  it("should deal with script tags", () => {
     // Check our script parsing worked:
-    var scripts = baseDoc.getElementsByTagName("script");
+    const scripts = baseDoc.getElementsByTagName("script");
     expect(scripts.length).eql(1);
     expect(scripts[0].textContent).eql("With < fancy \" characters in it because");
   });
 
-  it("should have working sibling/first+lastChild properties", function() {
-    var foo = baseDoc.getElementById("foo");
+  it("should have working sibling/first+lastChild properties", () => {
+    const foo = baseDoc.getElementById("foo");
 
     nodeExpect(foo.previousSibling.nextSibling, foo);
     nodeExpect(foo.nextSibling.previousSibling, foo);
     nodeExpect(foo.nextSibling, foo.nextElementSibling);
     nodeExpect(foo.previousSibling, foo.previousElementSibling);
 
-    var beforeFoo = foo.previousSibling;
-    var afterFoo = foo.nextSibling;
+    const beforeFoo = foo.previousSibling;
+    const afterFoo = foo.nextSibling;
 
     nodeExpect(baseDoc.body.lastChild, afterFoo);
     nodeExpect(baseDoc.body.firstChild, beforeFoo);
   });
 
-  it("should have working removeChild and appendChild functionality", function() {
-    var foo = baseDoc.getElementById("foo");
-    var beforeFoo = foo.previousSibling;
-    var afterFoo = foo.nextSibling;
+  it("should have working removeChild and appendChild functionality", () => {
+    const foo = baseDoc.getElementById("foo");
+    const beforeFoo = foo.previousSibling;
+    const afterFoo = foo.nextSibling;
 
-    var removedFoo = foo.parentNode.removeChild(foo);
+    const removedFoo = foo.parentNode.removeChild(foo);
     nodeExpect(foo, removedFoo);
     nodeExpect(foo.parentNode, null);
     nodeExpect(foo.previousSibling, null);
@@ -106,27 +105,27 @@ describe("Test JSDOM functionality", function() {
     nodeExpect(foo.previousSibling, foo.previousElementSibling);
   });
 
-  it("should handle attributes", function() {
-    var link = baseDoc.getElementsByTagName("a")[0];
+  it("should handle attributes", () => {
+    const link = baseDoc.getElementsByTagName("a")[0];
     expect(link.getAttribute("href")).eql("#");
     expect(link.getAttribute("class")).eql(link.className);
-    var foo = baseDoc.getElementById("foo");
+    const foo = baseDoc.getElementById("foo");
     expect(foo.id).eql(foo.getAttribute("id"));
   });
 
-  it("should have a working replaceChild", function() {
-    var parent = baseDoc.getElementsByTagName("div")[0];
-    var p = baseDoc.createElement("p");
+  it("should have a working replaceChild", () => {
+    const parent = baseDoc.getElementsByTagName("div")[0];
+    const p = baseDoc.createElement("p");
     p.setAttribute("id", "my-replaced-kid");
-    var childCount = parent.childNodes.length;
-    var childElCount = parent.children.length;
-    for (var i = 0; i < parent.childNodes.length; i++) {
-      var replacedNode = parent.childNodes[i];
-      var replacedAnElement = replacedNode.nodeType === replacedNode.ELEMENT_NODE;
-      var oldNext = replacedNode.nextSibling;
-      var oldNextEl = replacedNode.nextElementSibling;
-      var oldPrev = replacedNode.previousSibling;
-      var oldPrevEl = replacedNode.previousElementSibling;
+    const childCount = parent.childNodes.length;
+    const childElCount = parent.children.length;
+    for (let i = 0; i < parent.childNodes.length; i++) {
+      const replacedNode = parent.childNodes[i];
+      const replacedAnElement = replacedNode.nodeType === replacedNode.ELEMENT_NODE;
+      const oldNext = replacedNode.nextSibling;
+      const oldNextEl = replacedNode.nextElementSibling;
+      const oldPrev = replacedNode.previousSibling;
+      const oldPrevEl = replacedNode.previousElementSibling;
 
       parent.replaceChild(p, replacedNode);
 
@@ -145,16 +144,18 @@ describe("Test JSDOM functionality", function() {
       }
 
       // Check the siblings were updated
-      if (oldNext)
+      if (oldNext) {
         nodeExpect(oldNext.previousSibling, p);
-      if (oldPrev)
+      }
+      if (oldPrev) {
         nodeExpect(oldPrev.nextSibling, p);
+      }
 
       // check the array was updated
       nodeExpect(parent.childNodes[i], p);
 
       // Now check element properties/lists:
-      var kidElementIndex = parent.children.indexOf(p);
+      const kidElementIndex = parent.children.indexOf(p);
       // should be in the list:
       expect(kidElementIndex).not.eql(-1);
 
@@ -185,95 +186,98 @@ describe("Test JSDOM functionality", function() {
       nodeExpect(oldNextEl, replacedNode.nextElementSibling);
       nodeExpect(oldPrev, replacedNode.previousSibling);
       nodeExpect(oldPrevEl, replacedNode.previousElementSibling);
-      if (replacedNode.nextSibling)
+      if (replacedNode.nextSibling) {
         nodeExpect(replacedNode.nextSibling.previousSibling, replacedNode);
-      if (replacedNode.previousSibling)
+      }
+      if (replacedNode.previousSibling) {
         nodeExpect(replacedNode.previousSibling.nextSibling, replacedNode);
+      }
       if (replacedAnElement) {
-        if (replacedNode.previousElementSibling)
+        if (replacedNode.previousElementSibling) {
           nodeExpect(replacedNode.previousElementSibling.nextElementSibling, replacedNode);
-        if (replacedNode.nextElementSibling)
+        }
+        if (replacedNode.nextElementSibling) {
           nodeExpect(replacedNode.nextElementSibling.previousElementSibling, replacedNode);
+        }
       }
     }
   });
 });
 
-describe("Test HTML escaping", function() {
-  var baseStr = "<p>Hello, everyone &amp; all their friends, &lt;this&gt; is a &quot; test with &apos; quotes.</p>";
-  var doc = new JSDOMParser().parse(baseStr);
-  var p = doc.getElementsByTagName("p")[0];
-  var txtNode = p.firstChild;
-  it("should handle encoding HTML correctly", function() {
+describe("Test HTML escaping", () => {
+  const baseStr = "<p>Hello, everyone &amp; all their friends, &lt;this&gt; is a &quot; test with &apos; quotes.</p>";
+  const doc = new JSDOMParser().parse(baseStr);
+  const p = doc.getElementsByTagName("p")[0];
+  const txtNode = p.firstChild;
+  it("should handle encoding HTML correctly", () => {
     // This /should/ just be cached straight from reading it:
     expect("<p>" + p.innerHTML + "</p>").eql(baseStr);
     expect("<p>" + txtNode.innerHTML + "</p>").eql(baseStr);
   });
 
-  it("should have decoded correctly", function() {
+  it("should have decoded correctly", () => {
     expect(p.textContent).eql("Hello, everyone & all their friends, <this> is a \" test with ' quotes.");
     expect(txtNode.textContent).eql("Hello, everyone & all their friends, <this> is a \" test with ' quotes.");
   });
 
-  it("should handle updates via textContent correctly", function() {
+  it("should handle updates via textContent correctly", () => {
     // Because the initial tests might be based on cached innerHTML values,
     // let's manipulate via textContent in order to test that it alters
     // the innerHTML correctly.
     txtNode.textContent = txtNode.textContent + " ";
     txtNode.textContent = txtNode.textContent.trim();
-    var expectedHTML = baseStr.replace("&quot;", '"').replace("&apos;", "'");
+    const expectedHTML = baseStr.replace("&quot;", '"').replace("&apos;", "'");
     expect("<p>" + txtNode.innerHTML + "</p>").eql(expectedHTML);
     expect("<p>" + p.innerHTML + "</p>").eql(expectedHTML);
-
   });
 
-  it("should handle decimal and hex escape sequences", function() {
-    var parsedDoc = new JSDOMParser().parse("<p>&#32;&#x20;</p>");
+  it("should handle decimal and hex escape sequences", () => {
+    const parsedDoc = new JSDOMParser().parse("<p>&#32;&#x20;</p>");
     expect(parsedDoc.getElementsByTagName("p")[0].textContent).eql("  ");
   });
 });
 
 
-describe("Script parsing", function() {
-  it("should strip ?-based comments within script tags", function() {
-    var html = '<script><?Silly test <img src="test"></script>';
-    var doc = new JSDOMParser().parse(html);
+describe("Script parsing", () => {
+  it("should strip ?-based comments within script tags", () => {
+    const html = '<script><?Silly test <img src="test"></script>';
+    const doc = new JSDOMParser().parse(html);
     expect(doc.firstChild.tagName).eql("SCRIPT");
     expect(doc.firstChild.textContent).eql("");
     expect(doc.firstChild.children.length).eql(0);
     expect(doc.firstChild.childNodes.length).eql(0);
   });
 
-  it("should strip !-based comments within script tags", function() {
-    var html = '<script><!--Silly test > <script src="foo.js"></script>--></script>';
-    var doc = new JSDOMParser().parse(html);
+  it("should strip !-based comments within script tags", () => {
+    const html = '<script><!--Silly test > <script src="foo.js"></script>--></script>';
+    const doc = new JSDOMParser().parse(html);
     expect(doc.firstChild.tagName).eql("SCRIPT");
     expect(doc.firstChild.textContent).eql("");
     expect(doc.firstChild.children.length).eql(0);
     expect(doc.firstChild.childNodes.length).eql(0);
   });
 
-  it("should strip any other nodes within script tags", function() {
-    var html = "<script>&lt;div>Hello, I'm not really in a &lt;/div></script>";
-    var doc = new JSDOMParser().parse(html);
+  it("should strip any other nodes within script tags", () => {
+    const html = "<script>&lt;div>Hello, I'm not really in a &lt;/div></script>";
+    const doc = new JSDOMParser().parse(html);
     expect(doc.firstChild.tagName).eql("SCRIPT");
     expect(doc.firstChild.textContent).eql("<div>Hello, I'm not really in a </div>");
     expect(doc.firstChild.children.length).eql(0);
     expect(doc.firstChild.childNodes.length).eql(1);
   });
 
-  it("should strip any other invalid script nodes within script tags", function() {
-    var html = '<script>&lt;script src="foo.js">&lt;/script></script>';
-    var doc = new JSDOMParser().parse(html);
+  it("should strip any other invalid script nodes within script tags", () => {
+    const html = '<script>&lt;script src="foo.js">&lt;/script></script>';
+    const doc = new JSDOMParser().parse(html);
     expect(doc.firstChild.tagName).eql("SCRIPT");
     expect(doc.firstChild.textContent).eql("<script src=\"foo.js\"></script>");
     expect(doc.firstChild.children.length).eql(0);
     expect(doc.firstChild.childNodes.length).eql(1);
   });
 
-  it("should not be confused by partial closing tags", function() {
-    var html = "<script>var x = '&lt;script>Hi&lt;' + '/script>';</script>";
-    var doc = new JSDOMParser().parse(html);
+  it("should not be confused by partial closing tags", () => {
+    const html = "<script>var x = '&lt;script>Hi&lt;' + '/script>';</script>";
+    const doc = new JSDOMParser().parse(html);
     expect(doc.firstChild.tagName).eql("SCRIPT");
     expect(doc.firstChild.textContent).eql("var x = '<script>Hi<' + '/script>';");
     expect(doc.firstChild.children.length).eql(0);
@@ -281,10 +285,10 @@ describe("Script parsing", function() {
   });
 });
 
-describe("Tag local name case handling", function() {
-  it("should lowercase tag names", function() {
-    var html = "<DIV><svG><clippath/></svG></DIV>";
-    var doc = new JSDOMParser().parse(html);
+describe("Tag local name case handling", () => {
+  it("should lowercase tag names", () => {
+    const html = "<DIV><svG><clippath/></svG></DIV>";
+    const doc = new JSDOMParser().parse(html);
     expect(doc.firstChild.tagName).eql("DIV");
     expect(doc.firstChild.localName).eql("div");
     expect(doc.firstChild.firstChild.tagName).eql("SVG");
@@ -294,10 +298,10 @@ describe("Tag local name case handling", function() {
   });
 });
 
-describe("Recovery from self-closing tags that have close tags", function() {
-  it("should handle delayed closing of a tag", function() {
-    var html = "<div><input><p>I'm in an input</p></input></div>";
-    var doc = new JSDOMParser().parse(html);
+describe("Recovery from self-closing tags that have close tags", () => {
+  it("should handle delayed closing of a tag", () => {
+    const html = "<div><input><p>I'm in an input</p></input></div>";
+    const doc = new JSDOMParser().parse(html);
     expect(doc.firstChild.localName).eql("div");
     expect(doc.firstChild.childNodes.length).eql(1);
     expect(doc.firstChild.firstChild.localName).eql("input");
@@ -306,11 +310,11 @@ describe("Recovery from self-closing tags that have close tags", function() {
   });
 });
 
-describe("baseURI parsing", function() {
-  it("should handle various types of relative and absolute base URIs", function() {
+describe("baseURI parsing", () => {
+  it("should handle various types of relative and absolute base URIs", () => {
     function checkBase(base, expectedResult) {
-      var html = "<html><head><base href='" + base + "'></base></head><body/></html>";
-      var doc = new JSDOMParser().parse(html, "http://fakehost/some/dir/");
+      const html = "<html><head><base href='" + base + "'></base></head><body/></html>";
+      const doc = new JSDOMParser().parse(html, "http://fakehost/some/dir/");
       expect(doc.baseURI).eql(expectedResult);
     }
 
@@ -321,11 +325,11 @@ describe("baseURI parsing", function() {
   });
 });
 
-describe("namespace workarounds", function() {
-  it("should handle random namespace information in the serialized DOM", function() {
-    var html = "<a0:html><a0:body><a0:DIV><a0:svG><a0:clippath/></a0:svG></a0:DIV></a0:body></a0:html>";
-    var doc = new JSDOMParser().parse(html);
-    var div = doc.getElementsByTagName("div")[0];
+describe("namespace workarounds", () => {
+  it("should handle random namespace information in the serialized DOM", () => {
+    const html = "<a0:html><a0:body><a0:DIV><a0:svG><a0:clippath/></a0:svG></a0:DIV></a0:body></a0:html>";
+    const doc = new JSDOMParser().parse(html);
+    const div = doc.getElementsByTagName("div")[0];
     expect(div.tagName).eql("DIV");
     expect(div.localName).eql("div");
     expect(div.firstChild.tagName).eql("SVG");
