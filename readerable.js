@@ -96,6 +96,4 @@ function isProbablyReaderable(doc, isVisible) {
   });
 }
 
-if (typeof exports === "object") {
-  exports.isProbablyReaderable = isProbablyReaderable;
-}
+export default isProbablyReaderable;

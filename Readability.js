@@ -2086,6 +2086,4 @@ Readability.prototype = {
   },
 };
 
-if (typeof module === "object") {
-  module.exports = Readability;
-}
+export default Readability;
